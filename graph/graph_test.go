@@ -11,7 +11,7 @@ import (
 )
 
 // newGraphFromYAMLFile builds a graph for a given YAML formatted file
-// used only for testing purposes
+// (used only for testing purposes)
 func newGraphFromYAMLFile(path string) (Graph, error) {
 
 	var err error
@@ -31,14 +31,13 @@ func newGraphFromYAMLFile(path string) (Graph, error) {
 	// Fill up new graph
 	g := &graphImpl{make(map[string]Node)}
 	for nodeName, nodeSuccessors := range parsedData {
-		g.GetOrCreateNode(nodeName, nil)
+		_ = g.GetOrCreateNode(nodeName, nil)
 		for _, successorName := range nodeSuccessors {
-			newNode := g.GetOrCreateNode(successorName, nil)
+			_ = g.GetOrCreateNode(successorName, nil)
 			err := g.Link(nodeName, successorName)
 			if err != nil {
 				return nil, err
 			}
-			newNode.finalize()
 		}
 	}
 
@@ -62,7 +61,7 @@ func TestGraphInternalAPI(t *testing.T) {
 	var successors []Node
 
 	// simple1.yaml
-	g, err = newGraphFromYAMLFile("../_testdata/simple1.yml")
+	g, err = newGraphFromYAMLFile("../test/data/simple1.yml")
 	assert.NotNil(t, g)
 	assert.NoError(t, err)
 
@@ -93,7 +92,7 @@ func TestPhasicTopologicalSort(t *testing.T) {
 	var nodeNames []string
 
 	// simple1.yml - simple chain with one bifurcation
-	g, _ = newGraphFromYAMLFile("../_testdata/simple1.yml")
+	g, _ = newGraphFromYAMLFile("../test/data/simple1.yml")
 	pts, err = g.PhasicTopologicalSortFromNode("A")
 	assert.NotNil(t, pts)
 	assert.NoError(t, err)
@@ -128,7 +127,7 @@ func TestPhasicTopologicalSort(t *testing.T) {
 	assert.Equal(t, "G", nodes[0].Name())
 
 	// simple2.yml - diverged at A, merged at E
-	g, _ = newGraphFromYAMLFile("../_testdata/simple2.yml")
+	g, _ = newGraphFromYAMLFile("../test/data/simple2.yml")
 	pts, err = g.PhasicTopologicalSortFromNode("A")
 	assert.NotNil(t, pts)
 	assert.NoError(t, err)
@@ -165,7 +164,7 @@ func TestCyclicGraph(t *testing.T) {
 	var cycleNodeNames []string
 
 	// Acyclic
-	g, err = newGraphFromYAMLFile("../_testdata/simple1.yml")
+	g, err = newGraphFromYAMLFile("../test/data/simple1.yml")
 	assert.NotNil(t, g)
 	assert.NoError(t, err)
 
@@ -175,7 +174,7 @@ func TestCyclicGraph(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Cyclic 1
-	g, err = newGraphFromYAMLFile("../_testdata/cyclic1.yml")
+	g, err = newGraphFromYAMLFile("../test/data/cyclic1.yml")
 	assert.NotNil(t, g)
 	assert.NoError(t, err)
 
@@ -186,18 +185,5 @@ func TestCyclicGraph(t *testing.T) {
 	assert.Contains(t, cycleNodeNames, "A")
 	assert.Contains(t, cycleNodeNames, "B")
 	assert.Contains(t, cycleNodeNames, "C")
-	assert.Nil(t, err)
-
-	// Cyclic 2 (from real life)
-	g, err = newGraphFromYAMLFile("../_testdata/cyclic2.yml")
-	assert.NotNil(t, g)
-	assert.NoError(t, err)
-
-	cyclic, cycleNodes, err = g.Cyclic()
-	cycleNodeNames = NodeSeqNames(cycleNodes)
-	assert.True(t, cyclic)
-	assert.Len(t, cycleNodes, 2)
-	assert.Contains(t, cycleNodeNames, "LOCAL_PROJECT_ID_User")
-	assert.Contains(t, cycleNodeNames, "LOCAL_PROJECT_ID_Session")
 	assert.Nil(t, err)
 }

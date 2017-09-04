@@ -34,8 +34,8 @@ type nodeColor uint8
 
 const (
 	white nodeColor = 1 << iota
-	gray            = 1 << iota
-	black           = 1 << iota
+	gray
+	black
 )
 
 // nodeImpl implements Node interface
@@ -72,7 +72,7 @@ func (n *nodeImpl) String() string {
 	}
 
 	for _, successor := range n.successors {
-		_, err = buffer.WriteString(fmt.Sprintf(" %s ", successor.name))
+		_, err = buffer.WriteString(fmt.Sprintf(" %s ", successor.Name()))
 		if err != nil {
 			return err.Error()
 		}
@@ -98,10 +98,9 @@ func (n *nodeImpl) Successors() []Node {
 func (n *nodeImpl) link(successor Node, keepSorted bool) error {
 	if successor == nil {
 		return fmt.Errorf("Trying to add nil successor to node")
-	} else {
-		n.successors = append(n.successors, successor)
-		return nil
 	}
+
+	n.successors = append(n.successors, successor)
 	if keepSorted {
 		// I prefer to keep the sequence of successors lexicographically sorted;
 		sort.Slice(
@@ -109,6 +108,7 @@ func (n *nodeImpl) link(successor Node, keepSorted bool) error {
 			func(i, j int) bool { return n.successors[i].Name() < n.successors[j].Name() },
 		)
 	}
+	return nil
 }
 
 func (n *nodeImpl) getColor() nodeColor {

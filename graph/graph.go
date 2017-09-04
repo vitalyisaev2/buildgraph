@@ -75,7 +75,7 @@ func (g *graphImpl) Link(nodeName string, successorName string) error {
 		return fmt.Errorf("Link: adding nonexistant successor %s to node %s", successorName, nodeName)
 	}
 
-	return n.link(s)
+	return n.link(s, true)
 }
 
 // PhasicTopologicalSortFromRoot returns new PhasicTopologicalSort for a given root
