@@ -6,8 +6,8 @@ type Build struct {
 	gorm.Model
 
 	// relates to
-	ProjectContext   ProjectContext
-	ProjectContextID int
+	Project   Project
+	ProjectID uint
 
 	// fields
 	CIQueueID int // Assigned by CI server

@@ -1,1 +1,3 @@
+buildgraph
 *.coverprofile
+*.db

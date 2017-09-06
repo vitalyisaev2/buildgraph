@@ -18,37 +18,26 @@ type Hook struct {
 
 	// relates to
 	Project   Project
-	ProjectID int
+	ProjectID uint
 
 	// fields
-	State State
+	Commits []Commit
 }
 
-// Commit is an elementary change of the project in terms of VCS
+// Commit is an elementary change of the project in terms of Git VCS
 type Commit struct {
 	gorm.Model
 
 	// relates to
-	Project   Project
-	ProjectID int
-	Author    Author
-	AuthorID  int
-	Hook      Hook
-	HookID    int
+	Author   Author
+	AuthorID uint
+	HookID   uint
+	Changes  []PathChange
 
 	// fields
 	Hash    string
 	Message string
 	URL     string
-	Author  Author
-}
-
-// Action helps to find out what exactly occured with a
-// file/dir in a particular commit
-type Action struct {
-	gorm.Model
-
-	Description string
 }
 
 // Path describes which file/dir was affected by a commit
@@ -57,12 +46,27 @@ type Path struct {
 
 	// relates to
 	Project   Project
-	ProjectID int
-	Commit    Commit
-	CommitID  int
-	Action    Action
-	ActionID  int
+	ProjectID uint
+	// fields
+	Name string
+}
 
-	Name   string
-	Action PathAction
+// PathEvent shows what exactly changed on path
+type PathEvent struct {
+	gorm.Model
+	// fields
+	Name string
+}
+
+// PathChange struct
+type PathChange struct {
+	gorm.Model
+
+	// relates to
+	Commit   Commit
+	CommitID uint
+	Path     Path
+	PathID   uint
+	Event    PathEvent
+	EventID  uint
 }
