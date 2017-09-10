@@ -1,0 +1,3 @@
+CREATE SCHEMA workflow;
+CREATE SCHEMA vcs;
+CREATE SCHEMA ci;

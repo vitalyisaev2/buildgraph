@@ -1,0 +1,6 @@
+storage:
+    postgres:
+        endpoint: localhost:5432
+        user: buildgraph
+        password: password
+        database: buildgraph
