@@ -5,6 +5,11 @@ test:
 clean:
 	rm *coverprofile || true
 
+migrations:
+	cd ./storage/postgres/migrations/ && \
+	go-bindata -o ./bindata.go -pkg migrations . && \
+	cd -
+
 build:
 	go build .
 

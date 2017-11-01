@@ -1,0 +1,3 @@
+DROP SCHEMA workflow;
+DROP SCHEMA vcs;
+DROP SCHEMA ci;
