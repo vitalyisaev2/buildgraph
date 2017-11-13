@@ -58,8 +58,20 @@ func (pc *PostgresConfig) validate() error {
 }
 
 func (pc *PostgresConfig) URL() string {
-	// FIXME: TLS
+	// TODO: TLS
 	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", pc.User, pc.Password, pc.Endpoint, pc.Database)
+}
+
+type VCSConfig struct {
+	Gitlab *GitlabConfig
+}
+
+// GitlabConfig describes configuration of Github CI server,
+// that will post notifications about CI events
+type GitlabConfig struct {
+	Endpoint string
+	User     string
+	Password string
 }
 
 func NewConfig(path string) (*Config, error) {

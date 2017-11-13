@@ -1,0 +1,19 @@
+sudo: required
+
+services:
+    - docker
+
+language: go
+
+go:
+    - 1.x
+
+before_install:
+    - sudo service postgresql stop
+    - docker-compose run -d postgres
+    - go get github.com/go-playground/overalls
+    - go get -t ./...
+
+script:
+    - make test
+
