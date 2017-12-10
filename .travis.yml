@@ -19,7 +19,7 @@ before_install:
     - docker run -d --name buildgraph-postgresql -p 5432:5432 -e 'POSTGRES_USER=buildgraph' -e 'POSTGRES_PASSWORD=buildgraph' -e 'POSTGRES_DB=buildgraph' postgres:10
     - docker run -d --name gitlab-postgresql -e 'DB_NAME=gitlabhq_production' -e 'DB_USER=gitlab' -e 'DB_PASS=password' -e 'DB_EXTENSION=pg_trgm' sameersbn/postgresql:9.6-2
     - docker run -d --name gitlab-redis sameersbn/redis:latest
-    - docker run -d --name gitlab --link gitlab-postgresql:postgresql --link gitlab-redis:redisio -p 10080:80 -e 'GITLAB_PORT=10080' -e 'GITLAB_SSH_PORT=10022' -e 'GITLAB_SECRETS_DB_KEY_BASE=secret' -e 'GITLAB_SECRETS_SECRET_KEY_BASE=secret' -e 'GITLAB_SECRETS_OTP_KEY_BASE=secret' -e 'GITLAB_ROOT_PASSWORD=password' sameersbn/gitlab:10.1.4
+    - docker run -d --name gitlab --link gitlab-postgresql:postgresql --link gitlab-redis:redisio -p 10080:80 -e 'GITLAB_PORT=10080' -e 'GITLAB_SSH_PORT=10022' -e 'GITLAB_SECRETS_DB_KEY_BASE=secret' -e 'GITLAB_SECRETS_SECRET_KEY_BASE=secret' -e 'GITLAB_SECRETS_OTP_KEY_BASE=secret' -e 'GITLAB_ROOT_PASSWORD=password' sameersbn/gitlab:10.2.2
     - go get github.com/go-playground/overalls
     - go get -v -u -t ./...
     - docker ps

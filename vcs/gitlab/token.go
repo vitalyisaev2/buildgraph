@@ -229,15 +229,3 @@ func scrapePersonalAccessToken(body io.Reader) (string, error) {
 	}
 	return scrape.Attr(data, "value"), nil
 }
-
-//func main() {
-//var (
-//endpoint  = "http://localhost:10080"
-//login     = "root"
-//password  = "password"
-//name      = "test4"
-//expiresAt = time.Now().Add(48 * time.Hour)
-//)
-//token, err := newPersonalAccessToken(endpoint, login, password, name, &expiresAt)
-//fmt.Println(token, err)
-//}
