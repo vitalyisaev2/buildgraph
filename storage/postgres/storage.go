@@ -57,11 +57,18 @@ func (s *storageImpl) SaveAuthor(ctx context.Context, author storage.Author) err
 
 	f := func(tx *sql.Tx) error {
 		var id int
-		err := tx.QueryRow(
-			`INSERT INTO vcs.authors(name, email)
-			VALUES ($1, $2)
-			ON CONFLICT DO NOTHING
-			RETURNING id`,
+
+		_, err := tx.ExecContext(
+			ctx,
+			`INSERT INTO vcs.authors(name, email) VALUES ($1, $2) ON CONFLICT DO NOTHING;`,
+			author.GetName(), author.GetEmail())
+		if err != nil {
+			return err
+		}
+
+		err = tx.QueryRowContext(
+			ctx,
+			`SELECT id from vcs.authors WHERE name = $1 AND email = $2;`,
 			author.GetName(), author.GetEmail()).Scan(&id)
 		if err != nil {
 			return err
@@ -80,9 +87,9 @@ func (s *storageImpl) GetAuthor(ctx context.Context, name, email string) (storag
 
 	f := func(tx *sql.Tx) error {
 		var id int
-		err := tx.QueryRow(
-			`SELECT id FROM vcs.authors
-			WHERE name = $1 AND email = $2`,
+		err := tx.QueryRowContext(
+			ctx,
+			`SELECT id FROM vcs.authors WHERE name = $1 AND email = $2;`,
 			name, email).Scan(&id)
 		if err != nil {
 			return err
@@ -125,7 +132,7 @@ func NewStorage(cfg *config.PostgresConfig) (storage.Storage, error) {
 	}
 
 	// Migrate database
-	if err := m.Up(); err != nil {
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return nil, fmt.Errorf("Failed to migrate: %v", err)
 	}
 
