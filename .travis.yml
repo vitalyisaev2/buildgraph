@@ -1,11 +1,8 @@
 sudo: required
 
-<<<<<<< HEAD
 env:
     - BUILDENV=travis
 
-=======
->>>>>>> fd0b619c5039599a59a989a953360dd756462775
 services:
     - docker
 
