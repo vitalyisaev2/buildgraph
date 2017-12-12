@@ -22,30 +22,24 @@ const (
 	pathPersonalAccessToken = "/profile/personal_access_tokens"
 )
 
-type params struct {
-	endpointURL  *url.URL
-	credentials  *credentials
-	tokenRequest *tokenRequest
+type tokenParams struct {
+	endpointURL *url.URL  // Gitlab endpoint
+	login       string    // Gitlab user login used for HTTP basic auth
+	password    string    // Gitlab user password used for HTTP basic auth
+	name        string    // token name
+	expiresAt   time.Time // token expiration date
 }
 
-type credentials struct {
-	login    string
-	password string
-}
-
-type tokenRequest struct {
-	name      string
-	expiresAt *time.Time
-}
-
-type csrf struct {
+type csrfParams struct {
 	param string
 	value string
 }
 
-func newPersonalAccessToken(
+// NewPersonalAccessToken uses HTTP basic auth in order to get
+// new personal access token for Gitlab API
+func NewPersonalAccessToken(
 	endpoint, login, password string,
-	tokenName string, tokenExpiresAt *time.Time,
+	tokenName string, tokenExpiresAt time.Time,
 ) (string, error) {
 
 	endpointURL, err := url.Parse(endpoint)
@@ -53,16 +47,12 @@ func newPersonalAccessToken(
 		return "", err
 	}
 
-	p := &params{
+	p := &tokenParams{
 		endpointURL: endpointURL,
-		credentials: &credentials{
-			login:    login,
-			password: password,
-		},
-		tokenRequest: &tokenRequest{
-			name:      tokenName,
-			expiresAt: tokenExpiresAt,
-		},
+		login:       login,
+		password:    password,
+		name:        tokenName,
+		expiresAt:   tokenExpiresAt,
 	}
 
 	cookieJar, err := cookiejar.New(nil)
@@ -89,7 +79,7 @@ func newPersonalAccessToken(
 
 // obtainRootCSRFToken requests main page of Gitlab in order to obtain
 // CSRF token for a further use
-func obtainRootCSRFToken(client *http.Client, p *params) (*csrf, error) {
+func obtainRootCSRFToken(client *http.Client, p *tokenParams) (*csrfParams, error) {
 	targetURL := *p.endpointURL
 	targetURL.Path = path.Join(targetURL.Path, pathRoot)
 
@@ -113,16 +103,16 @@ func obtainRootCSRFToken(client *http.Client, p *params) (*csrf, error) {
 
 // obtainSignInCSRFToken signs into Gitlab with provided credentials in order
 // to obtain CSRF token for a further use
-func obtainSignInCSRFToken(client *http.Client, p *params, csrfToken *csrf) (*csrf, error) {
+func obtainSignInCSRFToken(client *http.Client, p *tokenParams, csrf *csrfParams) (*csrfParams, error) {
 	targetURL := *p.endpointURL
 	targetURL.Path = path.Join(targetURL.Path, pathSignIn)
 
 	v := url.Values{}
-	v.Set("user[login]", p.credentials.login)
-	v.Set("user[password]", p.credentials.password)
+	v.Set("user[login]", p.login)
+	v.Set("user[password]", p.password)
 	v.Set("user[remember_me]", "0")
 	v.Set("utf8", "✓")
-	v.Set(csrfToken.param, csrfToken.value)
+	v.Set(csrf.param, csrf.value)
 
 	form := strings.NewReader(v.Encode())
 
@@ -143,16 +133,16 @@ func obtainSignInCSRFToken(client *http.Client, p *params, csrfToken *csrf) (*cs
 	return scrapeCSRFToken(resp.Body)
 }
 
-func obtainPersonalAccessToken(client *http.Client, p *params, csrfToken *csrf) (string, error) {
+func obtainPersonalAccessToken(client *http.Client, p *tokenParams, csrf *csrfParams) (string, error) {
 	targetURL := *p.endpointURL
 	targetURL.Path = path.Join(targetURL.Path, pathPersonalAccessToken)
 
 	v := url.Values{}
-	v.Set("personal_access_token[expires_at]", p.tokenRequest.expiresAt.Format("2006-01-02"))
-	v.Set("personal_access_token[name]", p.tokenRequest.name)
+	v.Set("personal_access_token[expires_at]", p.expiresAt.Format("2006-01-02"))
+	v.Set("personal_access_token[name]", p.name)
 	v.Set("personal_access_token[scopes][]", "api")
 	v.Set("utf8", "✓")
-	v.Set(csrfToken.param, csrfToken.value)
+	v.Set(csrf.param, csrf.value)
 
 	form := strings.NewReader(v.Encode())
 
@@ -175,7 +165,7 @@ func obtainPersonalAccessToken(client *http.Client, p *params, csrfToken *csrf) 
 }
 
 // scrapeCSRFToken parses web-page in search of CSRF tokens
-func scrapeCSRFToken(body io.Reader) (*csrf, error) {
+func scrapeCSRFToken(body io.Reader) (*csrfParams, error) {
 	root, err := html.Parse(body)
 	if err != nil {
 		return nil, err
@@ -203,7 +193,7 @@ func scrapeCSRFToken(body io.Reader) (*csrf, error) {
 		return nil, fmt.Errorf("Can't find csrf-token attribute")
 	}
 
-	result := &csrf{
+	result := &csrfParams{
 		param: scrape.Attr(csrfParamNode, "content"),
 		value: scrape.Attr(csrfTokenNode, "content"),
 	}

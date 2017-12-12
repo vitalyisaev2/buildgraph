@@ -3,26 +3,22 @@ package postgres
 import (
 	"context"
 	"testing"
-	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 	"github.com/vitalyisaev2/buildgraph/config"
 	"github.com/vitalyisaev2/buildgraph/storage"
 	"go.uber.org/zap"
 )
 
-const (
-	dockerTimeout        = time.Minute
-	testPostgresEndpoint = "localhost:5432"
-	testPostgresUser     = "buildgraph"
-	testPostgresPassword = "buildgraph"
-	testPostgresDatabase = "buildgraph"
+var (
+	stubLogger = logrus.New()
 )
 
 // integration tests for PostgreSQL-backed storage
 type storageSuite struct {
 	suite.Suite
-	logger  *zap.Logger
+	logger  *logrus.Logger
 	storage storage.Storage
 	ctx     context.Context
 }
@@ -30,24 +26,14 @@ type storageSuite struct {
 func (s *storageSuite) SetupSuite() {
 	var err error
 
-	// root context
 	s.ctx = context.Background()
-
-	// Create logger
-	if s.logger, err = zap.NewDevelopment(); err != nil {
-		s.T().Fatalf("Failed to initialize logger: %v", err)
-	}
+	s.logger = stubLogger
 
 	// Run storage abstraction (this will cause migrations as well)
-	storageConfig := &config.PostgresConfig{
-		Endpoint: testPostgresEndpoint,
-		User:     testPostgresUser,
-		Password: testPostgresPassword,
-		Database: testPostgresDatabase,
-	}
+	cfg, _ := config.NewConfig("../../config/example.yaml")
 
 	// Database initialization
-	s.storage, err = NewStorage(storageConfig)
+	s.storage, err = NewStorage(stubLogger, cfg.Storage.Postgres)
 	if err != nil {
 		s.logger.Error("Failed to initialize storage", zap.Error(err))
 		s.T().Fail()
@@ -55,25 +41,7 @@ func (s *storageSuite) SetupSuite() {
 
 }
 
-func (s *storageSuite) Test_Author() {
-	inputAuthor := &author{
-		name:  "Vitaly Isaev",
-		email: "admin@vitalya.ru",
-	}
-	err := s.storage.SaveAuthor(s.ctx, inputAuthor)
-	s.Assert().NoError(err)
-	s.Assert().NotZero(inputAuthor.GetID())
-
-	outputAuthor, err := s.storage.GetAuthor(s.ctx, inputAuthor.GetName(), inputAuthor.GetEmail())
-	s.Assert().NoError(err)
-	if s.Assert().NotNil(outputAuthor) {
-		s.Assert().Equal(inputAuthor.GetName(), outputAuthor.GetName())
-		s.Assert().Equal(inputAuthor.GetEmail(), outputAuthor.GetEmail())
-		s.Assert().Equal(inputAuthor.GetID(), outputAuthor.GetID())
-	}
-}
-
-func (s *storageSuite) TearDownSuite() { s.logger.Sync() }
+func (s *storageSuite) TearDownSuite() {}
 
 func TestIntegration_PostgreSQLStorage(t *testing.T) {
 	suite.Run(t, &storageSuite{})
