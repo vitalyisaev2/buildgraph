@@ -3,7 +3,7 @@ test:
 	go tool cover -func=./overalls.coverprofile
 
 clean:
-	rm *coverprofile || true
+	find . -type f -name "*.coverprofile" -exec rm -rf {} \;
 
 migrations:
 	cd ./storage/postgres/migrations/ && \
