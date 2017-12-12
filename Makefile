@@ -13,4 +13,7 @@ migrations:
 build:
 	go build .
 
+run: build
+	./buildgraph -c config/example.yaml
+
 .PHONY: test
