@@ -18,11 +18,9 @@ type gitlabSuite struct {
 
 func (s *gitlabSuite) SetupSuite() {
 	config := &gitlabConfig{
-		credentials: &credentials{
-			login:    "root",
-			password: "password",
-		},
-		timeout: 10 * time.Second,
+		login:    "root",
+		password: "password",
+		timeout:  10 * time.Second,
 	}
 
 	config.endpoint = "http://localhost:10080"

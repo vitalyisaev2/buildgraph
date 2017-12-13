@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/vitalyisaev2/buildgraph/config"
@@ -11,12 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	dockerTimeout        = time.Minute
-	testPostgresEndpoint = "localhost:5432"
-	testPostgresUser     = "buildgraph"
-	testPostgresPassword = "buildgraph"
-	testPostgresDatabase = "buildgraph"
+var (
+	stubLogger, _ = zap.NewDevelopment()
 )
 
 // integration tests for PostgreSQL-backed storage
@@ -30,24 +25,14 @@ type storageSuite struct {
 func (s *storageSuite) SetupSuite() {
 	var err error
 
-	// root context
 	s.ctx = context.Background()
-
-	// Create logger
-	if s.logger, err = zap.NewDevelopment(); err != nil {
-		s.T().Fatalf("Failed to initialize logger: %v", err)
-	}
+	s.logger = stubLogger
 
 	// Run storage abstraction (this will cause migrations as well)
-	storageConfig := &config.PostgresConfig{
-		Endpoint: testPostgresEndpoint,
-		User:     testPostgresUser,
-		Password: testPostgresPassword,
-		Database: testPostgresDatabase,
-	}
+	cfg, _ := config.NewConfig("../../config/example.yaml")
 
 	// Database initialization
-	s.storage, err = NewStorage(storageConfig)
+	s.storage, err = NewStorage(stubLogger, cfg.Storage.Postgres)
 	if err != nil {
 		s.logger.Error("Failed to initialize storage", zap.Error(err))
 		s.T().Fail()
