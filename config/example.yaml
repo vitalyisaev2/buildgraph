@@ -4,5 +4,5 @@ storage:
         user: buildgraph
         password: password
         database: buildgraph
-server:
+webserver:
     endpoint: 192.168.1.100:1988

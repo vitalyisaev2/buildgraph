@@ -1,4 +1,4 @@
-package handler
+package webserver
 
 import (
 	"context"
@@ -7,36 +7,28 @@ import (
 
 	"github.com/vitalyisaev2/buildgraph/common"
 	"github.com/vitalyisaev2/buildgraph/config"
+	"go.uber.org/zap"
 )
 
 var (
 	_ (http.Handler)   = (*handler)(nil)
-	_ (common.Service) = (*handler)(nil)
+	_ (common.Service) = (*server)(nil)
 )
 
 type handler struct {
 	mux *http.ServeMux
 }
 
-func (h *handler) ServeHTTP(http.ResponseWriter, *http.Request) { h.mux.ServeHTTP(w, r) }
+func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) { h.mux.ServeHTTP(w, r) }
 
 type server struct {
-	logger     common.Logger
+	logger     *zap.Logger
 	handler    *handler
 	httpServer *http.Server
 
-	errorChan chan<- error
+	errChan chan<- error
 
-	cfg *config.ServerConfig
-}
-
-func (s *server) Start() {
-	s.logger.Debug("Starting HTTP server")
-	go func() {
-		if err := s.httpServer.ListenAndServe(); err != nil {
-			s.errorChan <- err
-		}
-	}()
+	cfg *config.WebserverConfig
 }
 
 const terminationTimeout = time.Second
@@ -47,16 +39,25 @@ func (s *server) Stop() {
 	s.httpServer.Shutdown(ctx)
 }
 
-func NewWebServer(logger common.Logger, cfg *config.ServerConfig, errChan chan<- error) common.Service {
+func NewWebServer(logger *zap.Logger, cfg *config.WebserverConfig, errChan chan<- error) common.Service {
+	h := &handler{
+		mux: http.NewServeMux(),
+	}
+
 	s := &server{
 		httpServer: &http.Server{
-			Addr:    s.cfg.Endpoint,
-			Handler: s.handler,
-		},
-		handler: &handler{
-			mux: http.NewServeMux(),
+			Addr:    cfg.Endpoint,
+			Handler: h,
 		},
 		logger:  logger,
 		errChan: errChan,
 	}
+
+	go func() {
+		if err := s.httpServer.ListenAndServe(); err != nil {
+			s.errChan <- err
+		}
+	}()
+
+	return s
 }

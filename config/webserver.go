@@ -2,11 +2,11 @@ package config
 
 import "fmt"
 
-type ServerConfig struct {
+type WebserverConfig struct {
 	Endpoint string `yaml:"endpoint"`
 }
 
-func (c *ServerConfig) validate() error {
+func (c *WebserverConfig) validate() error {
 	if c.Endpoint == "" {
 		return fmt.Errorf("Wrong ServerConfig.Endpoint")
 	}

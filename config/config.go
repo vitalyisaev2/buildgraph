@@ -9,8 +9,8 @@ import (
 
 // Config top-level structure
 type Config struct {
-	Storage *StorageConfig `yaml:"storage"`
-	Server  *ServerConfig  `yaml:"server"`
+	Storage   *StorageConfig   `yaml:"storage"`
+	Webserver *WebserverConfig `yaml:"webserver"`
 }
 
 func (c *Config) validate() error {
@@ -22,10 +22,10 @@ func (c *Config) validate() error {
 		return err
 	}
 
-	if c.Server == nil {
+	if c.Webserver == nil {
 		return fmt.Errorf("Missing required section Server")
 	}
-	if err := c.Server.validate(); err != nil {
+	if err := c.Webserver.validate(); err != nil {
 		return err
 	}
 

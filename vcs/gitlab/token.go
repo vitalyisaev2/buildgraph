@@ -35,9 +35,9 @@ type csrfParams struct {
 	value string
 }
 
-// NewPersonalAccessTokenFromBaseAuth uses HTTP basic auth in order to get
+// NewPersonalAccessToken uses HTTP basic auth in order to get
 // new personal access token for Gitlab API
-func NewPersonalAccessTokenFromBaseAuth(
+func NewPersonalAccessToken(
 	endpoint, login, password string,
 	tokenName string, tokenExpiresAt time.Time,
 ) (string, error) {
