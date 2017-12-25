@@ -7,6 +7,8 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"go.uber.org/zap"
+
 	"github.com/mattes/migrate"
 	_ "github.com/mattes/migrate/database/postgres"
 	bindata "github.com/mattes/migrate/source/go-bindata"
@@ -23,7 +25,8 @@ var (
 )
 
 type storageImpl struct {
-	db *sql.DB
+	db     *sql.DB
+	logger *zap.Logger
 }
 
 type transaction func(*sql.Tx) error
@@ -108,9 +111,13 @@ func (s *storageImpl) GetAuthor(ctx context.Context, name, email string) (storag
 	return result, nil
 }
 
-func (s *storageImpl) Close() error { return s.Close() }
+func (s *storageImpl) Stop() {
+	if err := s.db.Close(); err != nil {
+		s.logger.Error("Failed to close database", zap.Error(err))
+	}
+}
 
-func NewStorage(cfg *config.PostgresConfig) (storage.Storage, error) {
+func NewStorage(logger *zap.Logger, cfg *config.PostgresConfig) (storage.Storage, error) {
 	// Prepare migrations
 	resource := bindata.Resource(
 		migrations.AssetNames(),
@@ -143,7 +150,8 @@ func NewStorage(cfg *config.PostgresConfig) (storage.Storage, error) {
 	}
 
 	s := &storageImpl{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 	return s, nil
 }

@@ -7,7 +7,8 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	c, err := NewConfig("./config.yml")
+	c, err := NewConfig("./example.yaml")
 	assert.NoError(t, err)
+	assert.NotNil(t, c)
 	assert.Equal(t, "buildgraph", c.Storage.Postgres.User)
 }
