@@ -9,69 +9,27 @@ import (
 
 // Config top-level structure
 type Config struct {
-	Storage *StorageConfig
+	Storage   *StorageConfig   `yaml:"storage"`
+	Webserver *WebserverConfig `yaml:"webserver"`
 }
 
 func (c *Config) validate() error {
-	var err error
-	if c.Storage != nil {
-		err = c.Storage.validate()
-	}
-	return err
-}
 
-// StorageConfig describes various configurations of a storage layer
-type StorageConfig struct {
-	Postgres *PostgresConfig
-}
+	if c.Storage == nil {
+		return fmt.Errorf("Missing required section Storage")
+	}
+	if err := c.Storage.validate(); err != nil {
+		return err
+	}
 
-func (c *StorageConfig) validate() error {
-	var err error
-	if c.Postgres != nil {
-		err = c.Postgres.validate()
+	if c.Webserver == nil {
+		return fmt.Errorf("Missing required section Server")
 	}
-	return err
-}
+	if err := c.Webserver.validate(); err != nil {
+		return err
+	}
 
-// PostgresConfig describes configuration of PostgreSQL client
-type PostgresConfig struct {
-	Endpoint string
-	User     string
-	Password string
-	Database string
-}
-
-func (pc *PostgresConfig) validate() error {
-	if pc.Endpoint == "" {
-		return fmt.Errorf("Wrong Storage.PostgresConfig.Endpoint value: %s", pc.Endpoint)
-	}
-	if pc.User == "" {
-		return fmt.Errorf("Wrong Storage.PostgresConfig.User value: %s", pc.User)
-	}
-	if pc.Password == "" {
-		return fmt.Errorf("Wrong Storage.PostgresConfig.Password value: %s", pc.Password)
-	}
-	if pc.Database == "" {
-		return fmt.Errorf("Wrong Storage.PostgresConfig.Database value: %s", pc.Password)
-	}
 	return nil
-}
-
-func (pc *PostgresConfig) URL() string {
-	// TODO: TLS
-	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", pc.User, pc.Password, pc.Endpoint, pc.Database)
-}
-
-type VCSConfig struct {
-	Gitlab *GitlabConfig
-}
-
-// GitlabConfig describes configuration of Github CI server,
-// that will post notifications about CI events
-type GitlabConfig struct {
-	Endpoint string
-	User     string
-	Password string
 }
 
 func NewConfig(path string) (*Config, error) {
