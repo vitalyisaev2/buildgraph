@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	"github.com/sirupsen/logrus"
@@ -8,16 +8,16 @@ import (
 )
 
 type Collection struct {
-	Logger  *logrus.Logger // TODO: switch it to interface
+	Logger  *logrus.Logger // TODO: turn into interface
 	Storage storage.Storage
 }
 
 func (c *Collection) Stop() {
-	c.Logger.Debug("Stopping storage")
+	c.Logger.Debug("stopping storage")
 	c.Storage.Stop()
 }
 
-func NewCollection(logger *logrus.Logger, cfg *config.Config, errChan chan<- error) (*Collection, error) {
+func NewCollection(logger *logrus.Logger, cfg *config.Config) (*Collection, error) {
 	var (
 		c   Collection
 		err error

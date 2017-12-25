@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	gitlab "github.com/xanzy/go-gitlab"
-	"go.uber.org/zap"
 )
 
 const (
@@ -32,7 +32,7 @@ type gitlabAPI interface {
 type gitlabAPIImpl struct {
 	client *gitlab.Client
 	token  string
-	logger *zap.Logger
+	logger *logrus.Logger
 	cfg    *gitlabConfig
 }
 
@@ -65,10 +65,7 @@ func newGitlabAPI(cfg *gitlabConfig) (gitlabAPI, error) {
 	}
 
 	// prepare logger
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return nil, err
-	}
+	logger := logrus.New()
 
 	// obtain API token
 	tokenName := "test" + time.Now().Format("2006-01-02_15.04.02")
