@@ -13,13 +13,12 @@ const (
 	pathSession string = pathAPI + "/session"
 )
 
-// gitlabConfig provides parameters to access Gitlab API
+// gitlabConfig provides various parameters to access API
 type gitlabConfig struct {
-	endpoint string
-	login    string
-	password string
-	timeout  time.Duration
-	projects map[string]string
+	endpoint    string
+	credentials *credentials
+	timeout     time.Duration
+	projects    map[string]string
 }
 
 // this interface contains a limited set of methods used only in integration tests
@@ -73,12 +72,12 @@ func newGitlabAPI(cfg *gitlabConfig) (gitlabAPI, error) {
 	// obtain API token
 	tokenName := "test" + time.Now().Format("2006-01-02_15.04.02")
 	tokenExpirationDate := time.Now().Add(48 * time.Hour)
-	token, err := NewPersonalAccessToken(
+	token, err := newPersonalAccessToken(
 		cfg.endpoint,
-		cfg.login,
-		cfg.password,
+		cfg.credentials.login,
+		cfg.credentials.password,
 		tokenName,
-		tokenExpirationDate,
+		&tokenExpirationDate,
 	)
 	if err != nil {
 		return nil, err

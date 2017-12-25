@@ -3,7 +3,7 @@ test:
 	go tool cover -func=./overalls.coverprofile
 
 clean:
-	find . -type f -name "*.coverprofile" -exec rm -rf {} \;
+	rm *coverprofile || true
 
 migrations:
 	cd ./storage/postgres/migrations/ && \
@@ -12,8 +12,5 @@ migrations:
 
 build:
 	go build .
-
-run: build
-	./buildgraph -c config/example.yaml
 
 .PHONY: test
