@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/vitalyisaev2/buildgraph/config"
 	"github.com/vitalyisaev2/buildgraph/storage"
-	"go.uber.org/zap"
 )
 
 var (
@@ -35,7 +34,7 @@ func (s *storageSuite) SetupSuite() {
 	// Database initialization
 	s.storage, err = NewStorage(stubLogger, cfg.Storage.Postgres)
 	if err != nil {
-		s.logger.Error("Failed to initialize storage", zap.Error(err))
+		s.logger.WithError(err).Error("failed to initialize storage")
 		s.T().Fail()
 	}
 

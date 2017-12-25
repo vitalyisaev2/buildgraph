@@ -10,7 +10,6 @@ import (
 	"github.com/vitalyisaev2/buildgraph/config"
 	"github.com/vitalyisaev2/buildgraph/service"
 	"github.com/vitalyisaev2/buildgraph/webserver"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -45,7 +44,7 @@ func run(logger *logrus.Logger, cfg *config.Config) {
 	logger.Info("starting subsystems")
 	services, err := service.NewCollection(logger, cfg)
 	if err != nil {
-		logger.Fatal("service initialization error", zap.Error(err))
+		logger.WithError(err).Fatal("service initialization error")
 	}
 
 	logger.Info("starting webserver")
@@ -57,7 +56,7 @@ func run(logger *logrus.Logger, cfg *config.Config) {
 	case <-stopChan:
 		logger.Info("interruption signal has been received")
 	case err := <-errChan:
-		logger.Error("fatal error", zap.Error(err))
+		logger.WithError(err).Error("fatal error")
 	}
 
 	ws.Stop()
