@@ -18,6 +18,7 @@ before_install:
         -e 'POSTGRES_USER=buildgraph' \
         -e 'POSTGRES_PASSWORD=password' \
         -e 'POSTGRES_DB=buildgraph' \
+        --restart=always \
         postgres:10
     - |
         docker run -d --name gitlab-postgresql \
@@ -25,6 +26,7 @@ before_install:
         -e 'DB_USER=gitlab' \
         -e 'DB_PASS=password' \
         -e 'DB_EXTENSION=pg_trgm' \
+        --restart=always \
         sameersbn/postgresql:9.6-2
     - |
         docker run -d --name gitlab-redis sameersbn/redis:latest
@@ -38,6 +40,7 @@ before_install:
         -e 'GITLAB_SECRETS_SECRET_KEY_BASE=secret' \
         -e 'GITLAB_SECRETS_OTP_KEY_BASE=secret' \
         -e 'GITLAB_ROOT_PASSWORD=password' \
+        --restart=always \
         sameersbn/gitlab:10.2.2
     - go get github.com/go-playground/overalls
     - go get -v -u -t ./...
