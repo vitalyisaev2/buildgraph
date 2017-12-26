@@ -1,0 +1,6 @@
+digraph {
+    node [shape=circle,fontsize=8,fixedsize=true,width=1.0];
+    edge [fontsize=8];
+    rankdir=LR;
+
+}

@@ -20,9 +20,6 @@ type Graph interface {
 	CreateNode(string, interface{}) (Node, error)
 	GetOrCreateNode(string, interface{}) Node
 	Link(parent string, child string) error
-
-	//SortedKeys() []string
-	//Items() map[string]Node
 }
 
 type graphImpl struct {

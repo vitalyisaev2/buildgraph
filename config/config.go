@@ -9,8 +9,9 @@ import (
 
 // Config top-level structure
 type Config struct {
-	Storage   *StorageConfig   `yaml:"storage"`
-	Webserver *WebserverConfig `yaml:"webserver"`
+	Storage   *StorageConfig      `yaml:"storage"`
+	Webserver *WebserverConfig    `yaml:"webserver"`
+	Projects  map[string][]string `yaml:""`
 }
 
 func (c *Config) validate() error {
