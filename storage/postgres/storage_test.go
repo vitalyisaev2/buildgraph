@@ -29,15 +29,18 @@ func (s *storageSuite) SetupSuite() {
 	s.logger = stubLogger
 
 	// Run storage abstraction (this will cause migrations as well)
-	cfg, _ := config.NewConfig("../../config/example.yaml")
+	cfg, err := config.NewConfig("../../config/example.yml")
+	if err != nil {
+		s.logger.WithError(err).Error("failed to read config")
+		s.T().FailNow()
+	}
 
 	// Database initialization
 	s.storage, err = NewStorage(stubLogger, cfg.Storage.Postgres)
 	if err != nil {
 		s.logger.WithError(err).Error("failed to initialize storage")
-		s.T().Fail()
+		s.T().FailNow()
 	}
-
 }
 
 func (s *storageSuite) TearDownSuite() {}

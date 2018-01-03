@@ -29,22 +29,7 @@ func newGraphFromYAMLFile(path string) (Graph, error) {
 	}
 
 	// Fill up new graph
-	g := &defaultGraph{make(map[string]Node)}
-	for nodeName, nodeSuccessors := range parsedData {
-		if _, err = g.CreateNode(nodeName, nil); err != nil {
-			return err
-		}
-		for _, successorName := range nodeSuccessors {
-			if _, err = g.CreateNode(successorName, nil); err != nil {
-				return err
-			}
-			if err = g.Link(nodeName, successorName); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	return g, nil
+	return NewGraphFromAdjacencyMap(parsedData)
 }
 
 // utility for fast checks
