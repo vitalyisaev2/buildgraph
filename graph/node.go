@@ -6,29 +6,6 @@ import (
 	"sort"
 )
 
-// Node represents an item of a directed acyclic graph.
-// Every node is a container that can store arbitrary data types.
-// WARNING: no goroutine-safety
-type Node interface {
-	// Inherited interfaces
-	fmt.Stringer
-
-	// Public API
-	Name() string
-	Color() nodeColor
-	Value() interface{}
-	Successors() []Node
-
-	// Node construction API (not used outside the package)
-	link(successor Node, keepSorted bool) error
-
-	// Node coloring API is involved in various graph algorithms (not used outside the package)
-	getColor() nodeColor
-	setColorWhite() error
-	setColorGray() error
-	setColorBlack() error
-}
-
 // nodeColor abstraction is used in graph algorithms
 type nodeColor uint8
 
@@ -38,8 +15,8 @@ const (
 	black
 )
 
-// nodeImpl implements Node interface
-type nodeImpl struct {
+// defaultNode implements Node interface
+type defaultNode struct {
 	name       string
 	value      interface{}
 	successors []Node
@@ -47,22 +24,22 @@ type nodeImpl struct {
 }
 
 // Name getter
-func (n *nodeImpl) Name() string {
+func (n *defaultNode) Name() string {
 	return n.name
 }
 
 // Color getter
-func (n *nodeImpl) Color() nodeColor {
+func (n *defaultNode) Color() nodeColor {
 	return n.color
 }
 
 // Value getter
-func (n *nodeImpl) Value() interface{} {
+func (n *defaultNode) Value() interface{} {
 	return n.value
 }
 
 // String returns string representation of node
-func (n *nodeImpl) String() string {
+func (n *defaultNode) String() string {
 	var err error
 	var buffer bytes.Buffer
 
@@ -87,7 +64,7 @@ func (n *nodeImpl) String() string {
 }
 
 // Successors returns iterator over node successors
-func (n *nodeImpl) Successors() []Node {
+func (n *defaultNode) Successors() []Node {
 	items := make([]Node, 0, len(n.successors))
 	for _, successor := range n.successors {
 		items = append(items, successor)
@@ -95,7 +72,7 @@ func (n *nodeImpl) Successors() []Node {
 	return items
 }
 
-func (n *nodeImpl) link(successor Node, keepSorted bool) error {
+func (n *defaultNode) link(successor Node, keepSorted bool) error {
 	if successor == nil {
 		return fmt.Errorf("Trying to add nil successor to node")
 	}
@@ -111,16 +88,16 @@ func (n *nodeImpl) link(successor Node, keepSorted bool) error {
 	return nil
 }
 
-func (n *nodeImpl) getColor() nodeColor {
+func (n *defaultNode) getColor() nodeColor {
 	return n.color
 }
 
-func (n *nodeImpl) setColorWhite() error {
+func (n *defaultNode) setColorWhite() error {
 	n.color = white
 	return nil
 }
 
-func (n *nodeImpl) setColorGray() error {
+func (n *defaultNode) setColorGray() error {
 	var err error
 	switch n.color {
 	case white:
@@ -135,7 +112,7 @@ func (n *nodeImpl) setColorGray() error {
 	return err
 }
 
-func (n *nodeImpl) setColorBlack() error {
+func (n *defaultNode) setColorBlack() error {
 	var err error
 	switch n.color {
 	case white:
@@ -152,36 +129,46 @@ func (n *nodeImpl) setColorBlack() error {
 
 // NewNode returns new Node interface instance
 func NewNode(nodeName string, nodeValue interface{}) Node {
-	return &nodeImpl{nodeName, nodeValue, make([]Node, 0), white}
+	return &defaultNode{nodeName, nodeValue, make([]Node, 0), white}
 }
 
-// nodeStack - custom stack implementation. Copied from here: http://gitlab.srv.pv.km/id/Settings/blob/master/json/converter/stack.go (much thanks to Denis Shilkin)
-type nodeStack []Node
+// NodeList - custom stack implementation. Copied from here: http://gitlab.srv.pv.km/id/Settings/blob/master/json/converter/stack.go (much thanks to Denis Shilkin)
+type NodeList []Node
 
-func (s *nodeStack) Push(n Node) {
+func (s *NodeList) Push(n Node) {
 	*s = append(*s, n)
 }
 
-func (s *nodeStack) Pop() Node {
+func (s *NodeList) Pop() Node {
 	ret := (*s)[len(*s)-1]
 	*s = (*s)[0 : len(*s)-1]
 	return ret
 }
 
-func (s *nodeStack) PopFront() Node {
+func (s *NodeList) PopFront() Node {
 	ret := (*s)[0]
 	*s = (*s)[1:]
 	return ret
 }
 
-func (s *nodeStack) Top() Node {
+func (s *NodeList) Top() Node {
 	return (*s)[len(*s)-1]
 }
 
-func (s *nodeStack) IsEmpty() bool {
+func (s *NodeList) IsEmpty() bool {
 	return len(*s) == 0
 }
 
-func (s *nodeStack) Len() int {
+func (s *NodeList) Len() int {
 	return len(*s)
+}
+
+func (s *NodeList) String() string {
+	var b bytes.Buffer
+	b.WriteString("\n[\n")
+	for _, node := range *s {
+		b.WriteString(node.String())
+	}
+	b.WriteString("]\n")
+	return b.String()
 }

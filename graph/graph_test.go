@@ -29,13 +29,16 @@ func newGraphFromYAMLFile(path string) (Graph, error) {
 	}
 
 	// Fill up new graph
-	g := &graphImpl{make(map[string]Node)}
+	g := &defaultGraph{make(map[string]Node)}
 	for nodeName, nodeSuccessors := range parsedData {
-		_ = g.GetOrCreateNode(nodeName, nil)
+		if _, err = g.CreateNode(nodeName, nil); err != nil {
+			return err
+		}
 		for _, successorName := range nodeSuccessors {
-			_ = g.GetOrCreateNode(successorName, nil)
-			err := g.Link(nodeName, successorName)
-			if err != nil {
+			if _, err = g.CreateNode(successorName, nil); err != nil {
+				return err
+			}
+			if err = g.Link(nodeName, successorName); err != nil {
 				return nil, err
 			}
 		}

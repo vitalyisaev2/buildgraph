@@ -14,6 +14,6 @@ build:
 	go build .
 
 run: build
-	./buildgraph -c config/example.yaml
+	./buildgraph -c config/example.yml
 
 .PHONY: test

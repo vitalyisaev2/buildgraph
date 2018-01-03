@@ -9,24 +9,31 @@ import (
 
 // Config top-level structure
 type Config struct {
-	Storage   *StorageConfig      `yaml:"storage"`
-	Webserver *WebserverConfig    `yaml:"webserver"`
-	Projects  map[string][]string `yaml:""`
+	Storage   *StorageConfig   `yaml:"storage"`
+	Webserver *WebserverConfig `yaml:"webserver"`
+	Projects  *ProjectsConfig  `yaml:"projects"`
 }
 
 func (c *Config) validate() error {
 
 	if c.Storage == nil {
-		return fmt.Errorf("Missing required section Storage")
+		return fmt.Errorf("Missing required section 'storage'")
 	}
 	if err := c.Storage.validate(); err != nil {
 		return err
 	}
 
 	if c.Webserver == nil {
-		return fmt.Errorf("Missing required section Server")
+		return fmt.Errorf("Missing required section 'server'")
 	}
 	if err := c.Webserver.validate(); err != nil {
+		return err
+	}
+
+	if c.Projects == nil {
+		return fmt.Errorf("Missing required section 'projects'")
+	}
+	if err := c.Projects.validate(); err != nil {
 		return err
 	}
 
