@@ -53,7 +53,7 @@ func (pts *phasicTopologicalSort) String() string {
 // stores the maximal distance from the root for the every node
 func phasicTopologicalSortFromNode(n Node) (PhasicTopologicalSort, error) {
 
-	var stack nodeStack
+	var stack NodeList
 	nodeLevels := make(map[Node]int)
 
 	// Traverse graph and store nodeLevels in map
@@ -82,7 +82,7 @@ func phasicTopologicalSortFromNode(n Node) (PhasicTopologicalSort, error) {
 }
 
 // Depth first graph traversing for the sake of Phasic Topological Search
-func traverseGraphPTS(n Node, stack nodeStack, nodeLevels map[Node]int) {
+func traverseGraphPTS(n Node, stack NodeList, nodeLevels map[Node]int) {
 	// Append particular node to stack
 	stack.Push(n)
 

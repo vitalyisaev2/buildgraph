@@ -1,0 +1,37 @@
+# persistent storage settings
+storage:
+    postgres:
+        endpoint: localhost:5432
+        user: buildgraph
+        password: password
+        database: buildgraph
+
+# HTTP server settings
+webserver:
+    endpoint: 192.168.1.100:1988
+
+# Contains information about projects and their relations
+projects:
+    # List of tracked projects
+    descriptions:
+        - id: n1_p1
+          namespace: namespace1
+          name: project1
+        - id: n2_p1
+          namespace: namespace2
+          name: project1
+        - id: n2_p2
+          namespace: namespace2
+          name: project2
+        - id: n3_p1
+          namespace: namespace3
+          name: project1
+    # graph in the form of adjacency list (dependency -> dependent projects)
+    relations:
+        n1_p1:
+            - n2_p1
+            - n2_p2
+        n2_p1:
+            - n3_p1
+        n2_p2:
+            - n3_p1

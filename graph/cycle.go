@@ -2,18 +2,14 @@ package graph
 
 import "fmt"
 
-type cycleSearcher interface {
-	Cyclic() (bool, []Node, error)
-}
-
 // Looks for the cycles in DAG that involve particular Node;
 // in case if cycle was found, returns true and stack of nodes containing the cycle
-func cycleDiscoveryFromNode(n Node) (bool, nodeStack, error) {
+func cycleDiscoveryFromNode(n Node) (bool, NodeList, error) {
 
 	var err error
 
 	// Used for discovered cycle printing
-	var stack nodeStack
+	var stack NodeList
 	var cycleDiscovered = false
 
 	// Push stack. Paint node in gray when entering it
@@ -59,7 +55,7 @@ func cycleDiscoveryFromNode(n Node) (bool, nodeStack, error) {
 
 // Depth first graph traversing for the sake of cycle discovery
 // Side effect: changes cycleDiscovered bool passed from cycleDiscoveryFromNode
-func traverseGraphCS(n Node, stack *nodeStack, cycleDiscovered *bool) error {
+func traverseGraphCS(n Node, stack *NodeList, cycleDiscovered *bool) error {
 
 	var err error
 

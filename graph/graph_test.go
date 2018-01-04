@@ -29,19 +29,7 @@ func newGraphFromYAMLFile(path string) (Graph, error) {
 	}
 
 	// Fill up new graph
-	g := &graphImpl{make(map[string]Node)}
-	for nodeName, nodeSuccessors := range parsedData {
-		_ = g.GetOrCreateNode(nodeName, nil)
-		for _, successorName := range nodeSuccessors {
-			_ = g.GetOrCreateNode(successorName, nil)
-			err := g.Link(nodeName, successorName)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	return g, nil
+	return NewGraphFromAdjacencyMap(parsedData)
 }
 
 // utility for fast checks
@@ -61,7 +49,7 @@ func TestGraphInternalAPI(t *testing.T) {
 	var successors []Node
 
 	// simple1.yaml
-	g, err = newGraphFromYAMLFile("../test/data/simple1.yml")
+	g, err = newGraphFromYAMLFile("test/simple1.yml")
 	assert.NotNil(t, g)
 	assert.NoError(t, err)
 
@@ -92,7 +80,7 @@ func TestPhasicTopologicalSort(t *testing.T) {
 	var nodeNames []string
 
 	// simple1.yml - simple chain with one bifurcation
-	g, _ = newGraphFromYAMLFile("../test/data/simple1.yml")
+	g, _ = newGraphFromYAMLFile("test/simple1.yml")
 	pts, err = g.PhasicTopologicalSortFromNode("A")
 	assert.NotNil(t, pts)
 	assert.NoError(t, err)
@@ -127,7 +115,7 @@ func TestPhasicTopologicalSort(t *testing.T) {
 	assert.Equal(t, "G", nodes[0].Name())
 
 	// simple2.yml - diverged at A, merged at E
-	g, _ = newGraphFromYAMLFile("../test/data/simple2.yml")
+	g, _ = newGraphFromYAMLFile("test/simple2.yml")
 	pts, err = g.PhasicTopologicalSortFromNode("A")
 	assert.NotNil(t, pts)
 	assert.NoError(t, err)
@@ -164,7 +152,7 @@ func TestCyclicGraph(t *testing.T) {
 	var cycleNodeNames []string
 
 	// Acyclic
-	g, err = newGraphFromYAMLFile("../test/data/simple1.yml")
+	g, err = newGraphFromYAMLFile("test/simple1.yml")
 	assert.NotNil(t, g)
 	assert.NoError(t, err)
 
@@ -174,7 +162,7 @@ func TestCyclicGraph(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Cyclic 1
-	g, err = newGraphFromYAMLFile("../test/data/cyclic1.yml")
+	g, err = newGraphFromYAMLFile("test/cyclic1.yml")
 	assert.NotNil(t, g)
 	assert.NoError(t, err)
 
